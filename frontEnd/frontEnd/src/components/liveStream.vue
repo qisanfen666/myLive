@@ -2,16 +2,18 @@
 import { io } from 'socket.io-client'
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import socket from '../utils/socket.ts'
 
 const router = useRoute()
 const roomId = ref(router.params.roomId)
 console.log(roomId.value)
-const socket = io('http://localhost:3000')
 
+const message = ref('')
 const localVideo = ref<HTMLVideoElement|null>(null)   // 本地视频
 const remoteVideo = ref<HTMLVideoElement|null>(null)    // 远程视频
 const localStream = ref<MediaStream|null>(null)   // 本地媒体流
 let peerConnection : RTCPeerConnection|null = null  //用来连接本地和远程的媒体流
+
 
 //WebRTC配置,官方文档https://developer.mozilla.org/zh-CN/docs/Web/API/WebRTC_API/Using_webRTC
 //ICE(interactive Connectivity Establishment)是WebRTC的核心协议,用于穿透NAT和防火墙
@@ -88,8 +90,6 @@ const createOffer = async(userId:string)=>{
 }
 
 const initializeSocket = ()=>{
-    const roomId = 'room1' //房间号,可以根据需要修改
-    socket.emit('join-room', roomId) //加入房间
 
     socket.on('user-joined', (userId:string)=>{
         console.log('用户加入房间:', userId)

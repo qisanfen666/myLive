@@ -11,9 +11,15 @@ const userRegister = async (ctx:Context)=>{
             ctx.body = 'username, password and email are required'
             return false
         }
+        const ret = await userFind(username)
+        if(ret){
+            ctx.status = 401
+            ctx.body = {message:'用户名已存在'}
+            return false
+        }
         const user = await userCreate(username,password,email)
         ctx.status = 201
-        ctx.body = user
+        ctx.body = {message:'注册成功'}
         console.log('user created:',user)
         return true
     }
@@ -35,13 +41,13 @@ const userLogin = async (ctx:Context)=>{
         const user = await userFind(username)
         if(!user){
             ctx.status = 404
-            ctx.body = 'user not found'
+            ctx.body = {message:'用户不存在'}
             return false
         }
         const isSame =await bcrypt.compare(password,user.password)
         if(!isSame){
             ctx.status = 401
-            ctx.body = 'password is wrong'
+            ctx.body = {message:'密码错误'}
             return false
         }
 

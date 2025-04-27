@@ -1,13 +1,22 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import socket from '../utils/socket.ts'
 
 const router = useRouter()
 const roomId = ref<string|null>('')
 
+
 const startLive = ()=>{
-    const userRoomId = 'room1'
-    router.push(`/liveStream/${userRoomId}`)
+    if(!roomId.value.trim()){
+        alert('请输入房间号')
+        return
+    }
+    socket.emit('create-room',roomId.value)
+    socket.on('roomCreated',(id:string)=>{
+        console.log('房间创建成功',id)
+        router.push(`/liveStream/${id}`)
+    })
 }
 
 const joinLive = ()=>{
@@ -28,12 +37,14 @@ const editProfile = ()=>{
     <div class="home-page">
         <h1>欢迎来到直播平台</h1>
         <div class="actions">
-            <button @click="startLive">开直播</button>
-            <div class="join-room">
-                <input v-model="roomId" placeholder="请输入直播间 ID" />
-                <button @click="joinLive">进入直播间</button>
+            <input v-model="roomId" placeholder="请输入直播间 ID" />
+            <div class="join-room">            
+                <button @click="startLive">开始直播</button>
             </div>
-            <button @click="editProfile">修改个人信息</button>
+            <div class="join-room">
+                <button @click="joinLive">加入直播间</button>
+            </div>
+            <button @click="editProfile">个人信息</button>
         </div>
     </div>
 </template>
